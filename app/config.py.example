@@ -1,0 +1,14 @@
+"""
+simple_recognizer configuration file.
+DO NOT place it in public because it contains your face++ API token.
+"""
+
+# Default use face++ China Server
+SERVER = 'http://apicn.faceplusplus.com/'
+# uncomment the following line to switch to US server
+# SERVER = 'http://api.us.faceplusplus.com/'
+# Your API key and API secret.
+# You can get one at http://www.faceplusplus.com.cn/
+API_KEY = 'Your_API_KEY_Here'
+API_SECRET = 'Your_API_SECRET_HERE'
+

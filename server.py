@@ -1,19 +1,16 @@
 #!/usr/bin/python
+import app
+from flask_script import Manager as utils
+from flask_migrate import Migrate,MigrateCommand
 
-import socket
+migrate=Migrate(app.app,app.db)
+manager=utils(app.app)
+manager.add_command('db',MigrateCommand)
 
-# config server port
-server_port=12000
+@manager.command
+def debug():
+    '''Run Debug Server'''
+    app.app.run(debug=True)
 
-# start server use defined port
-
-server_socket=socket.socket(socket.AF_INET,socket.SOCK_STREAM)
-server_socket.bind(('',server_port))
-server_socket.listen(1)
-
-print("Server is ready to listen at port {}".format(server_port))
-
-while True:
-    connection,addr=server_socket.accept()
-    response=connection.recv(1024)
-    print("Ping from {}".format(response))
+if __name__=="__main__":
+    manager.run()
