@@ -2,6 +2,7 @@
 import flask
 import os
 import requests
+from . import config
 from app.model import User
 from flask_sqlalchemy import SQLAlchemy
 app=flask.Flask(__name__)
@@ -10,6 +11,18 @@ app.config['SQLALCHEMY_DATABASE_URI']="sqlite:///{}".format(path)
 app.config['SQLALCHEMY_COMMIT_ON_TEARDOWN']=True
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS']=True
 db=SQLAlchemy(app)
+
+def is_same_person(face_id,person_id):
+    query="https://apicn.faceplusplus.com/v2/recognition/verify?api_secret={}&face_id={}&api_key={}&person_id={}"
+    query=query.format(config.API_SECRET,face_id,config.API_KEY,person_id)
+    request=requests.get(query)
+    result=request.json()
+    print(result)
+    if 'error' in result:
+        return result
+    else:
+        return {'status':0,'is_same_person':result['is_same_person']}
+
 
 def get_or_post(method):
     """GET or POST method?"""
@@ -76,9 +89,18 @@ def users():
         return flask.jsonify(data)
 
 @app.route("/check/<face_id>",methods=['POST','GET'])
-def check(username):
-    print(flask.request.form)
-    return flask.jsonify(**flask.request.form)
-
+def check(face_id):
+    users={user.person_id:user.username for user in User.query.all()}
+    data={}
+    for person_id in users:
+        query=is_same_person(face_id,person_id)
+        if 'status' in query:
+            if query['is_same_person']:
+                data['same_person']=person_id
+            else:
+                data['same_person']=None     
+        data.update(query)
+    print(data)
+    return flask.jsonify(data)
 if __name__=="__main__":
     app.run(debug=True)
